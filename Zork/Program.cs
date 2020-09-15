@@ -3,17 +3,6 @@ using System.Numerics;
 
 namespace Zork
 {
-    enum Commands
-    {
-        QUIT,
-        LOOK,
-        NORTH,
-        SOUTH,
-        EAST,
-        WEST,
-        UNKOWN
-    }
-
     class Program
     {
         static void Main(string[] args)

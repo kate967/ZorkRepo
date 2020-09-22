@@ -5,9 +5,13 @@ namespace Zork
 {
     class Program
     {
+        private static string[] Rooms = {"Forest", "West of House", "Behind House", "Clearing", "Canyon View" };
+        private static int playerPos = 1;
+
         static void Main(string[] args)
         {
             Console.WriteLine("Welcome to Zork!");
+            Console.WriteLine(Rooms[playerPos]);
 
             Commands command = Commands.UNKOWN;
             while (command != Commands.QUIT)
@@ -15,7 +19,7 @@ namespace Zork
                 Console.Write("> ");
                 command = ToCommand(Console.ReadLine().Trim());
 
-                string outputString = "";
+                string outputString = Rooms[playerPos];
 
                 switch (command)
                 {
@@ -29,7 +33,10 @@ namespace Zork
                     case Commands.SOUTH:
                     case Commands.EAST:
                     case Commands.WEST:
-                        outputString = "You moved " + command.ToString();
+                        if (Move(command))
+                            outputString = "You moved " + command + ".\n" + Rooms[playerPos];
+                        else
+                            outputString = "The way is shut!";
                         break;
                     default:
                         outputString = "Unknown Command.";
@@ -37,6 +44,38 @@ namespace Zork
                 }
 
                 Console.WriteLine(outputString);
+            }
+        }
+
+        private static bool Move(Commands command)
+        {
+            switch (command)
+            {
+                case Commands.NORTH:
+                case Commands.SOUTH:
+                    return false;
+                case Commands.EAST:
+                    if((playerPos + 1) > 4)
+                    {
+                        return false;
+                    }
+                    else 
+                    {
+                        playerPos++;
+                        return true;
+                    }
+                case Commands.WEST:
+                    if ((playerPos - 1) < 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        playerPos--;
+                        return true;
+                    }
+                default:
+                    return false;
             }
         }
 

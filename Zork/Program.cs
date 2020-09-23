@@ -5,13 +5,17 @@ namespace Zork
 {
     class Program
     {
-        private static string[] Rooms = {"Forest", "West of House", "Behind House", "Clearing", "Canyon View" };
-        private static int playerPos = 1;
+        private static readonly string[,] Rooms = {
+            {"Rocky Trail", "South of House", "Canyon View"},
+            {"Forest", "West of House", "Behind House"},
+            {"Dense Woods", "North of House", "Clearing" }
+        };
+        private static (int row, int col) playerPos = (1, 1);
 
         static void Main(string[] args)
         {
             Console.WriteLine("Welcome to Zork!");
-            Console.WriteLine(Rooms[playerPos]);
+            Console.WriteLine(Rooms[playerPos.row, playerPos.col]);
 
             Commands command = Commands.UNKOWN;
             while (command != Commands.QUIT)
@@ -19,7 +23,7 @@ namespace Zork
                 Console.Write("> ");
                 command = ToCommand(Console.ReadLine().Trim());
 
-                string outputString = Rooms[playerPos];
+                string outputString = Rooms[playerPos.row, playerPos.col];
 
                 switch (command)
                 {
@@ -27,14 +31,19 @@ namespace Zork
                         outputString = "Thank you for playing.";
                         break;
                     case Commands.LOOK:
-                        outputString = "This is an open field west of a white house, with a boarded front door.\nA rubber mat saying 'Welcome to Zork!' lies by the door.";
+                        if (playerPos.row == 2 && playerPos.col == 1)
+                            outputString = "A rubber mat saying 'Welcome to Zork!' lies by the door." + "\n" + Rooms[playerPos.row, playerPos.col];
+                        else if (playerPos.row == 1 && playerPos.col == 0)
+                            outputString = "This is an open field west of a white house, with a boarded front door." + "\n" + Rooms[playerPos.row, playerPos.col];
+                        else
+                            outputString = "Nothing to look at here.";
                         break;
                     case Commands.NORTH:
                     case Commands.SOUTH:
                     case Commands.EAST:
                     case Commands.WEST:
                         if (Move(command))
-                            outputString = "You moved " + command + ".\n" + Rooms[playerPos];
+                            outputString = "You moved " + command + ".\n" + Rooms[playerPos.row, playerPos.col] + "\n" + playerPos.row + "," + playerPos.col;
                         else
                             outputString = "The way is shut!";
                         break;
@@ -52,26 +61,43 @@ namespace Zork
             switch (command)
             {
                 case Commands.NORTH:
-                case Commands.SOUTH:
-                    return false;
-                case Commands.EAST:
-                    if((playerPos + 1) > 4)
-                    {
-                        return false;
-                    }
-                    else 
-                    {
-                        playerPos++;
-                        return true;
-                    }
-                case Commands.WEST:
-                    if ((playerPos - 1) < 0)
+                    if ((playerPos.row + 1) > 2)
                     {
                         return false;
                     }
                     else
                     {
-                        playerPos--;
+                        playerPos.row++;
+                        return true;
+                    }
+                case Commands.SOUTH:
+                    if((playerPos.row - 1) < 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        playerPos.row--;
+                        return true;
+                    }
+                case Commands.EAST:
+                    if((playerPos.col + 1) > 2)
+                    {
+                        return false;
+                    }
+                    else 
+                    {
+                        playerPos.col++;
+                        return true;
+                    }
+                case Commands.WEST:
+                    if ((playerPos.col - 1) < 0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        playerPos.col--;
                         return true;
                     }
                 default:

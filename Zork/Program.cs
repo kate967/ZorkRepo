@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Numerics;
+using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 namespace Zork
 {
@@ -10,111 +12,89 @@ namespace Zork
             {"Forest", "West of House", "Behind House"},
             {"Dense Woods", "North of House", "Clearing" }
         };
+
+        private static readonly List<Commands> Directions = new List<Commands>
+        {
+            Commands.NORTH,
+            Commands.SOUTH,
+            Commands.EAST,
+            Commands.WEST,
+        };
+        
         private static (int row, int col) playerPos = (1, 1);
 
         static void Main(string[] args)
         {
             Console.WriteLine("Welcome to Zork!");
-            Console.WriteLine(Rooms[playerPos.row, playerPos.col]);
 
             Commands command = Commands.UNKOWN;
             while (command != Commands.QUIT)
             {
+                Console.WriteLine(CurrentRoom);
                 Console.Write("> ");
                 command = ToCommand(Console.ReadLine().Trim());
-
-                string outputString = Rooms[playerPos.row, playerPos.col];
 
                 switch (command)
                 {
                     case Commands.QUIT:
-                        outputString = "Thank you for playing.";
+                        Console.WriteLine("Thank you for playing!");
                         break;
                     case Commands.LOOK:
-                        if (playerPos.row == 2 && playerPos.col == 1)
-                            outputString = "A rubber mat saying 'Welcome to Zork!' lies by the door." + "\n" + Rooms[playerPos.row, playerPos.col];
-                        else if (playerPos.row == 1 && playerPos.col == 0)
-                            outputString = "This is an open field west of a white house, with a boarded front door." + "\n" + Rooms[playerPos.row, playerPos.col];
-                        else
-                            outputString = "Nothing to look at here.";
+                        Console.WriteLine ("A rubber mat saying 'Welcome to Zork!' lies by the door.");
                         break;
                     case Commands.NORTH:
                     case Commands.SOUTH:
                     case Commands.EAST:
                     case Commands.WEST:
-                        if (Move(command))
-                            outputString = "You moved " + command + ".\n" + Rooms[playerPos.row, playerPos.col] + "\n" + playerPos.row + "," + playerPos.col;
-                        else
-                            outputString = "The way is shut!";
+                        if (!Move(command))
+                            Console.WriteLine("The way is shut!");
                         break;
                     default:
-                        outputString = "Unknown Command.";
+                        Console.WriteLine("Unknown Command.");
                         break;
                 }
-
-                Console.WriteLine(outputString);
             }
         }
+
+        private static string CurrentRoom
+        {
+            get
+            {
+                return Rooms[playerPos.row, playerPos.col];
+            }
+        }
+
+        private static bool IsDirection(Commands command) =>
+            Directions.Contains(command);
 
         private static bool Move(Commands command)
         {
+            Assert.IsTrue(IsDirection(command), "Invalid direction");
+
+            bool isValidMove = true;
             switch (command)
             {
-                case Commands.NORTH:
-                    if ((playerPos.row + 1) > 2)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        playerPos.row++;
-                        return true;
-                    }
-                case Commands.SOUTH:
-                    if((playerPos.row - 1) < 0)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        playerPos.row--;
-                        return true;
-                    }
-                case Commands.EAST:
-                    if((playerPos.col + 1) > 2)
-                    {
-                        return false;
-                    }
-                    else 
-                    {
-                        playerPos.col++;
-                        return true;
-                    }
-                case Commands.WEST:
-                    if ((playerPos.col - 1) < 0)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        playerPos.col--;
-                        return true;
-                    }
+                case Commands.NORTH when playerPos.row < Rooms.GetLength(0) - 1:
+                    playerPos.row++;
+                    break;
+                case Commands.SOUTH when playerPos.row > 0:
+                    playerPos.row--;
+                    break;
+                case Commands.EAST when playerPos.col < Rooms.GetLength(1) - 1:
+                    playerPos.col++;
+                    break;
+                case Commands.WEST when playerPos.col > 0:
+                    playerPos.col--;
+                    break;
                 default:
-                    return false;
+                    isValidMove = false;
+                    break;
             }
+
+            return isValidMove;
         }
 
-        private static Commands ToCommand(string commandString)
-        {
-            if (Enum.TryParse<Commands>(commandString, true, out Commands result))
-            {
-                return result;
-            }
-            else
-            {
-                return Commands.UNKOWN;
-            }
-        }
+        private static Commands ToCommand(string commandString) => 
+            Enum.TryParse(commandString, true, out Commands result) ? result : Commands.UNKOWN;
     }
 }

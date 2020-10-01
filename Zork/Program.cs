@@ -16,17 +16,23 @@ namespace Zork
 
         private static void InitializeRoomDescriptions()
         {
-            Rooms[0, 0].Description = "You are on a rock-strewn trail.";
-            Rooms[0, 1].Description = "You are facing the south side of a white house. There is no door here, and all the windows are barred.";
-            Rooms[0, 2].Description = "You are at the top of the Great Canyon on its south wall.";
+            var roomMap = new Dictionary<string, Room>();
+            foreach(Room room in Rooms)
+            {
+                roomMap[room.Name] = room;
+            }
 
-            Rooms[1, 0].Description = "This is a forest, with trees in all directions around you.";
-            Rooms[1, 1].Description = "This is an open field west of the white house, with a boarded front door.";
-            Rooms[1, 2].Description = "You are behind the white house. In one corner of the house there is a small window which is slightly ajar.";
+            roomMap["Rocky Trail"].Description = "You are on a rock-strewn trail.";
+            roomMap["South of House"].Description = "You are facing the south side of a white house. There is no door here, and all the windows are barred.";
+            roomMap["Canyon View"].Description = "You are at the top of the Great Canyon on its south wall.";
 
-            Rooms[2, 0].Description = "This is a dimly lit forest, with large tress all around. To the east, there appears to be sunlight.";
-            Rooms[2, 1].Description = "You are facing the north side of a white house. There is no door here, and all the windows are barred.";
-            Rooms[2, 2].Description = "You are in a clearing, with a forest surroundingh you on the west and south.";
+            roomMap["Forest"].Description = "This is a forest, with trees in all directions around you.";
+            roomMap["West of House"].Description = "This is an open field west of the white house, with a boarded front door.";
+            roomMap["Behind House"].Description = "You are behind the white house. In one corner of the house there is a small window which is slightly ajar.";
+
+            roomMap["Dense Woods"].Description = "This is a dimly lit forest, with large tress all around. To the east, there appears to be sunlight.";
+            roomMap["North of House"].Description = "You are facing the north side of a white house. There is no door here, and all the windows are barred.";
+            roomMap["Clearing"].Description = "You are in a clearing, with a forest surroundingh you on the west and south.";
         }
 
         private static readonly List<Commands> Directions = new List<Commands>
@@ -41,14 +47,21 @@ namespace Zork
 
         static void Main(string[] args)
         {
+            Console.WriteLine("Welcome to Zork!");
             InitializeRoomDescriptions();
 
-            Console.WriteLine("Welcome to Zork!");
-
+            Room prevRoom = null;
             Commands command = Commands.UNKOWN;
             while (command != Commands.QUIT)
             {
                 Console.WriteLine(CurrentRoom);
+
+                if (prevRoom != CurrentRoom)
+                {
+                    Console.WriteLine(CurrentRoom.Description);
+                    prevRoom = CurrentRoom;
+                }
+                
                 Console.Write("> ");
                 command = ToCommand(Console.ReadLine().Trim());
 
@@ -92,16 +105,16 @@ namespace Zork
             bool isValidMove = true;
             switch (command)
             {
-                case Commands.NORTH when playerPos.row <= Rooms.GetLength(0) - 1:
+                case Commands.NORTH when playerPos.row > 0:
                     playerPos.row--;
                     break;
-                case Commands.SOUTH when playerPos.row >= 0:
+                case Commands.SOUTH when playerPos.row < Rooms.GetLength(0) - 1 :
                     playerPos.row++;
                     break;
-                case Commands.EAST when playerPos.col <= Rooms.GetLength(1) - 1:
+                case Commands.EAST when playerPos.col < Rooms.GetLength(0) - 1:
                     playerPos.col++;
                     break;
-                case Commands.WEST when playerPos.col >= 0:
+                case Commands.WEST when playerPos.col > 0:
                     playerPos.col--;
                     break;
                 default:

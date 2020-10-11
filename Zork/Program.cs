@@ -5,6 +5,7 @@ using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Zork
 {
@@ -21,55 +22,14 @@ namespace Zork
             Description
         }
 
-        private static readonly Dictionary<string, Room> roomMap;
-
-        static Program()
-        {
-            roomMap = new Dictionary<string, Room>();
-            foreach(Room room in Rooms)
-            {
-                roomMap[room.Name] = room;
-            }
-        }
-   
-        private static readonly Room[,] Rooms = {
+        private static Room[,] Rooms = {
             {new Room("Rocky Trail"), new Room("South of House"), new Room("Canyon View")},
             {new Room("Forest"), new Room("West of House"), new Room("Behind House")},
             {new Room("Dense Woods"), new Room("North of House"), new Room("Clearing") }
         };
 
-        private static void InitializeRoomDescriptions(string roomFilename)
-        {
-
-            const string fieldDelimiter = "##";
-            const int expectedFieldCount = 2;
-
-            var roomQuery = from line in File.ReadAllLines(roomFilename)
-                            let fields = line.Split(fieldDelimiter)
-                            where fields.Length == expectedFieldCount
-                            select (Name: fields[(int)Fields.Name],
-                                    Description: fields[(int)Fields.Description]);
-
-            foreach(var (Name, Description) in roomQuery)
-            {
-                roomMap[Name].Description = Description;
-            }
-
-            /*string[] lines = File.ReadAllLines(roomFilename);
-            foreach(string line in lines)
-            {
-                string[] fields = line.Split(fieldDelimiter);
-                if(fields.Length != expectedFieldCount)
-                {
-                    throw new InvalidDataException("Invalid Record");
-                }
-
-                string name = fields[(int)Fields.Name];
-                string description = fields[(int)Fields.Description];
-
-                roomMap[name].Description = description;
-            }*/
-        }
+        private static void InitializeRooms(string roomFilename) =>
+            Rooms = JsonConvert.DeserializeObject<Room[,]>(File.ReadAllText(roomFilename));
 
         private static readonly List<Commands> Directions = new List<Commands>
         {
@@ -85,9 +45,9 @@ namespace Zork
         {
             Console.WriteLine("Welcome to Zork!");
             
-            const string defaultRoomsFilename = "Rooms.txt";
+            const string defaultRoomsFilename = "Rooms.json";
             string roomsFilename = (args.Length > 0 ? args[(int)CommandLineArguments.RoomsFilename] : defaultRoomsFilename);
-            InitializeRoomDescriptions(roomsFilename);
+            InitializeRooms(roomsFilename);
 
             Room prevRoom = null;
             Commands command = Commands.UNKOWN;

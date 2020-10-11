@@ -1,9 +1,0 @@
-Rocky Trail##rocks
-South of House##south house
-Canyon View##canyon
-Forest##forest
-West of House##west house
-Behind House##behind the house
-Dense Woods##woods
-North of House##north house
-Clearing##clearing in forest
